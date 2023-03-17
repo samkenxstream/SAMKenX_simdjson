@@ -1,4 +1,4 @@
-/* auto-generated on 2023-03-02 09:39:35 -0500. Do not edit! */
+/* auto-generated on 2023-03-13 21:26:32 -0400. Do not edit! */
 /* begin file include/simdjson.h */
 #ifndef SIMDJSON_H
 #define SIMDJSON_H
@@ -43,7 +43,7 @@
 #define SIMDJSON_SIMDJSON_VERSION_H
 
 /** The version of simdjson being used (major.minor.revision) */
-#define SIMDJSON_VERSION "3.1.3"
+#define SIMDJSON_VERSION "3.1.6"
 
 namespace simdjson {
 enum {
@@ -58,7 +58,7 @@ enum {
   /**
    * The revision (major.minor.REVISION) of simdjson being used.
    */
-  SIMDJSON_VERSION_REVISION = 3
+  SIMDJSON_VERSION_REVISION = 6
 };
 } // namespace simdjson
 
@@ -263,6 +263,19 @@ use a 64-bit target such as x64, 64-bit ARM or 64-bit PPC.")
 #define SIMDJSON_NO_SANITIZE_UNDEFINED __attribute__((no_sanitize_undefined))
 #else
 #define SIMDJSON_NO_SANITIZE_UNDEFINED
+#endif
+
+
+#if defined(__clang__) || defined(__GNUC__)
+#if defined(__has_feature)
+#  if __has_feature(memory_sanitizer)
+#define SIMDJSON_NO_SANITIZE_MEMORY __attribute__((no_sanitize("memory")))
+#  endif // if __has_feature(memory_sanitizer)
+#endif // defined(__has_feature)
+#endif
+// make sure it is defined as 'nothing' if it is unapplicable.
+#ifndef SIMDJSON_NO_SANITIZE_MEMORY
+#define SIMDJSON_NO_SANITIZE_MEMORY
 #endif
 
 #if SIMDJSON_VISUAL_STUDIO
@@ -4501,7 +4514,9 @@ public:
    * ### REQUIRED: Buffer Padding
    *
    * The buffer must have at least SIMDJSON_PADDING extra allocated bytes. It does not matter what
-   * those bytes are initialized to, as long as they are allocated.
+   * those bytes are initialized to, as long as they are allocated. These bytes will be read: if you
+   * using a sanitizer that verifies that no uninitialized byte is read, then you should initialize the
+   * SIMDJSON_PADDING bytes to avoid runtime warnings.
    *
    * If realloc_if_needed is true (the default), it is assumed that the buffer does *not* have enough padding,
    * and it is copied into an enlarged temporary buffer before parsing. Thus the following is safe:
@@ -4764,7 +4779,9 @@ public:
    * ### REQUIRED: Buffer Padding
    *
    * The buffer must have at least SIMDJSON_PADDING extra allocated bytes. It does not matter what
-   * those bytes are initialized to, as long as they are allocated.
+   * those bytes are initialized to, as long as they are allocated. These bytes will be read: if you
+   * using a sanitizer that verifies that no uninitialized byte is read, then you should initialize the
+   * SIMDJSON_PADDING bytes to avoid runtime warnings.
    *
    * ### Threads
    *
@@ -8892,7 +8909,7 @@ inline error_code parser::ensure_capacity(document& target_document, size_t desi
 }
 
 simdjson_inline void parser::set_max_capacity(size_t max_capacity) noexcept {
-  if(max_capacity < MINIMAL_DOCUMENT_CAPACITY) {
+  if(max_capacity > MINIMAL_DOCUMENT_CAPACITY) {
     _max_capacity = max_capacity;
   } else {
     _max_capacity = MINIMAL_DOCUMENT_CAPACITY;
@@ -9841,6 +9858,10 @@ namespace {
 // but the algorithms do not end up using the returned value.
 // Sadly, sanitizers are not smart enough to figure it out.
 SIMDJSON_NO_SANITIZE_UNDEFINED
+// This function can be used safely even if not all bytes have been
+// initialized.
+// See issue https://github.com/simdjson/simdjson/issues/1965
+SIMDJSON_NO_SANITIZE_MEMORY
 simdjson_inline int trailing_zeroes(uint64_t input_num) {
 #ifdef SIMDJSON_REGULAR_VISUAL_STUDIO
   unsigned long ret;
@@ -13952,6 +13973,10 @@ namespace {
 // but the algorithms do not end up using the returned value.
 // Sadly, sanitizers are not smart enough to figure it out.
 SIMDJSON_NO_SANITIZE_UNDEFINED
+// This function can be used safely even if not all bytes have been
+// initialized.
+// See issue https://github.com/simdjson/simdjson/issues/1965
+SIMDJSON_NO_SANITIZE_MEMORY
 simdjson_inline int trailing_zeroes(uint64_t input_num) {
 #if SIMDJSON_REGULAR_VISUAL_STUDIO
   return (int)_tzcnt_u64(input_num);
@@ -16142,6 +16167,10 @@ namespace {
 // but the algorithms do not end up using the returned value.
 // Sadly, sanitizers are not smart enough to figure it out.
 SIMDJSON_NO_SANITIZE_UNDEFINED
+// This function can be used safely even if not all bytes have been
+// initialized.
+// See issue https://github.com/simdjson/simdjson/issues/1965
+SIMDJSON_NO_SANITIZE_MEMORY
 simdjson_inline int trailing_zeroes(uint64_t input_num) {
 #if SIMDJSON_REGULAR_VISUAL_STUDIO
   return (int)_tzcnt_u64(input_num);
@@ -18288,6 +18317,10 @@ namespace {
 // but the algorithms do not end up using the returned value.
 // Sadly, sanitizers are not smart enough to figure it out.
 SIMDJSON_NO_SANITIZE_UNDEFINED
+// This function can be used safely even if not all bytes have been
+// initialized.
+// See issue https://github.com/simdjson/simdjson/issues/1965
+SIMDJSON_NO_SANITIZE_MEMORY
 simdjson_inline int trailing_zeroes(uint64_t input_num) {
 #if SIMDJSON_REGULAR_VISUAL_STUDIO
   unsigned long ret;
@@ -20605,6 +20638,10 @@ namespace {
 // but the algorithms do not end up using the returned value.
 // Sadly, sanitizers are not smart enough to figure it out.
 SIMDJSON_NO_SANITIZE_UNDEFINED
+// This function can be used safely even if not all bytes have been
+// initialized.
+// See issue https://github.com/simdjson/simdjson/issues/1965
+SIMDJSON_NO_SANITIZE_MEMORY
 simdjson_inline int trailing_zeroes(uint64_t input_num) {
 #if SIMDJSON_REGULAR_VISUAL_STUDIO
   unsigned long ret;
@@ -26318,7 +26355,9 @@ public:
    * ### REQUIRED: Buffer Padding
    *
    * The buffer must have at least SIMDJSON_PADDING extra allocated bytes. It does not matter what
-   * those bytes are initialized to, as long as they are allocated.
+   * those bytes are initialized to, as long as they are allocated. These bytes will be read: if you
+   * using a sanitizer that verifies that no uninitialized byte is read, then you should initialize the
+   * SIMDJSON_PADDING bytes to avoid runtime warnings.
    *
    * @param json The JSON to parse.
    * @param len The length of the JSON.
@@ -26374,7 +26413,9 @@ public:
    * ### REQUIRED: Buffer Padding
    *
    * The buffer must have at least SIMDJSON_PADDING extra allocated bytes. It does not matter what
-   * those bytes are initialized to, as long as they are allocated.
+   * those bytes are initialized to, as long as they are allocated. These bytes will be read: if you
+   * using a sanitizer that verifies that no uninitialized byte is read, then you should initialize the
+   * SIMDJSON_PADDING bytes to avoid runtime warnings.
    *
    * @param json The JSON to parse.
    *
@@ -26428,7 +26469,9 @@ public:
    * ### REQUIRED: Buffer Padding
    *
    * The buffer must have at least SIMDJSON_PADDING extra allocated bytes. It does not matter what
-   * those bytes are initialized to, as long as they are allocated.
+   * those bytes are initialized to, as long as they are allocated. These bytes will be read: if you
+   * using a sanitizer that verifies that no uninitialized byte is read, then you should initialize the
+   * SIMDJSON_PADDING bytes to avoid runtime warnings.
    *
    * ### Threads
    *

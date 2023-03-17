@@ -74,7 +74,7 @@ namespace number_tests {
     for (int m = 10; m < 20; m++) {
       for (int i = -1024; i < 1024; i++) {
         auto str = std::to_string(i);
-        int64_t actual;
+        int64_t actual{};
         ASSERT_SUCCESS(parser.parse(str).get(actual));
         if (actual != i) {
           std::cerr << "JSON '" << str << "' parsed to " << actual << " instead of " << i << std::endl;
@@ -551,7 +551,7 @@ namespace parse_api_tests {
     ASSERT_SUCCESS( parser.parse_many(empty_batches_ndjson, BATCH_SIZE*16).get(stream) );
     for (auto doc : stream) {
       count++;
-      uint64_t val;
+      uint64_t val{};
       ASSERT_SUCCESS( doc.get(val) );
       ASSERT_EQUAL( val, count );
     }
@@ -1039,7 +1039,7 @@ namespace dom_api_tests {
     for (auto tweet : tweets) {
       object user;
       ASSERT_SUCCESS( tweet["user"].get(user) );
-      bool default_profile;
+      bool default_profile{};
       ASSERT_SUCCESS( user["default_profile"].get(default_profile) );
       if (default_profile) {
         std::string_view screen_name;
